@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BankAssist</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+	
+
+	    <div class="chat-container">
+
+			<div class="header">
+			    <h1>🏦 BankAssist</h1>
+			    <p class="subtitle">Your banking support assistant</p>
+			</div>
+	        <div id="chat">
+	            <div class="message bot">
+	                Hello! I'm BankAssist. How can I help you today?
+	            </div>
+	        </div>
+
+	        <div class="input-area">
+				<input
+				    type="text"
+				    id="message"
+				    placeholder="Ask a banking question..."
+				    onkeydown="handleKey(event)"
+				>
+	            <button onclick="sendMessage()">Send</button>
+				<button class="clear-button" onclick="clearChat()">Clear</button>
+	        </div>
+
+	    </div>
+
+	    <script>
+			function handleKey(event) {
+			    if (event.key === "Enter") {
+			        sendMessage();
+			    }
+			}
+			function clearChat() {
+			    document.getElementById("chat").innerHTML = `
+			        <div class="message bot">
+			            Hello! I'm BankAssist. How can I help you today?
+			        </div>
+			    `;
+			}
+			function formatResponse(text) {
+			    return text
+			        .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+			        .replace(/\n/g, "<br>");
+			}
+	        async function sendMessage() {
+
+	            const input = document.getElementById("message");
+	            const chat = document.getElementById("chat");
+
+	            const message = input.value.trim();
+
+	            if (!message) {
+	                return;
+	            }
+
+				const userMessage = document.createElement("div");
+				userMessage.className = "message user";
+				userMessage.textContent = message;
+				chat.appendChild(userMessage);
+
+	            input.value = "";
+
+	            chat.innerHTML += `
+	                <div class="message bot" id="thinking">
+	                    BankAssist is thinking...
+	                </div>
+	            `;
+
+	            chat.scrollTop = chat.scrollHeight;
+
+	            const response = await fetch(
+	                "/chat?message=" + encodeURIComponent(message)
+	            );
+
+				const answer = await response.text();
+
+				document.getElementById("thinking").remove();
+
+				chat.innerHTML += `
+				    <div class="message bot">
+				        ${formatResponse(answer)}
+				    </div>
+				`;
+	            chat.scrollTop = chat.scrollHeight;
+	        }
+			
+	    </script>
+
+	
+  
+</body>
+</html>
